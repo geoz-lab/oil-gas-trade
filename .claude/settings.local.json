@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3 list *)",
+      "Bash(pip3 install *)",
+      "Bash(conda --version)",
+      "Bash(conda env *)",
+      "Bash(conda run *)",
+      "Bash(/Users/geozhang/anaconda3/envs/oil-gas-trade/bin/pip install *)",
+      "Bash(/Users/geozhang/anaconda3/envs/oil-gas-trade/bin/python *)",
+      "Bash(curl -s \"https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=1KOp0ilv9n9u3SzzlGkxpKB6s5CQv2wRy3CqP75S&frequency=weekly&data[0]=value&facets[series][]=RBRTE&sort[0][column]=period&sort[0][direction]=desc&length=3\")",
+      "Bash(python3 -m json.tool)"
+    ]
+  }
+}

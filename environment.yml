@@ -1,0 +1,26 @@
+name: oil-gas-trade
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - statsmodels
+  - requests
+  - rich
+  - python-dotenv
+  - pydantic
+  - httpx
+  - matplotlib
+  - pip:
+      - anthropic
+      - yfinance
+      - lightgbm
+      - beautifulsoup4
+      - torch
+      - transformers
+      - accelerate

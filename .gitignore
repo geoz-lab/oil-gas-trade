@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Generated outputs (runtime artifacts)
+data/cache/*.json
+reports/*.md
+reports/*.json
+reports/*.png
+
+# ML checkpoints (large binary)
+robot/checkpoints/*.pt
+
+# OS
+.DS_Store

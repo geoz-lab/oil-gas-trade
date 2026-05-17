@@ -25,7 +25,7 @@ User Query
     │  2Y + 1Y + 6M windows, 5 quantiles        {price scale, CI bands}
     │  Provides: price level anchor
     ▼
-[03] Signal Retrieval ────────────────────────► SignalBundle (raw)
+[03a] Signal Retrieval ───────────────────────► SignalBundle (raw)
     │  ┌─ LLM keyword expansion                 {market + macro + textual}
     │  ├─ yfinance (Brent, WTI, spreads)
     │  ├─ EIA API v2 (stocks, inventories)
@@ -34,7 +34,7 @@ User Query
     │  └─ EIA weekly text + OPEC press room
     │     Saves: data/cache/YYYYMMDD_signal.json
     ▼
-[3b] Signal Judge (Constitutional AI) ────────► JudgmentResult
+[03b] Signal Judge (Constitutional AI) ───────► JudgmentResult
     │  Screens each signal for:                 {filtered SignalBundle}
     │  • Accuracy (verifiable vs. rumour)
     │  • Recency (< 6 months)
@@ -106,7 +106,7 @@ The LightGBM quantile ensemble (2Y + 1Y + 6M windows) establishes *how large* th
 ### 2. Signals = Directional Driver
 The signal pipeline (steps 3–7) determines *which direction* prices move and *when* the impact materializes. The baseline's point forecast is adjusted by `direction_bias_pct` derived from the adversarial debate.
 
-### 3. Constitutional AI Signal Judge (Step 3b)
+### 3. Constitutional AI Signal Judge (Step 03b)
 Inspired by RLHF / Constitutional AI principles, the judge evaluates every signal against five quality criteria before it can influence the forecast:
 
 | Criterion | What it catches |

@@ -20,7 +20,7 @@ User Query
     │  2Y + 1Y + 6M windows, 5 quantiles        {price scale, CI bands}
     │  Provides: price level anchor
     ▼
-[03] Signal Retrieval ────────────────────────► SignalBundle (raw)
+[03a] Signal Retrieval ───────────────────────► SignalBundle (raw)
     │  ┌─ LLM keyword expansion                 {market + macro + textual}
     │  ├─ yfinance (Brent, WTI, spreads)
     │  ├─ EIA API v2 (stocks, inventories)
@@ -29,7 +29,7 @@ User Query
     │  └─ EIA weekly text + OPEC press room
     │     Saves: data/cache/YYYYMMDD_signal.json
     ▼
-[3b] Signal Judge (Constitutional AI) ────────► JudgmentResult
+[03b] Signal Judge (Constitutional AI) ───────► JudgmentResult
     │  Screens each signal for:                 {filtered SignalBundle}
     │  • Accuracy (verifiable vs. rumour)
     │  • Recency (< 6 months)
@@ -204,7 +204,7 @@ oil+gas_trade/
 ├── agents/
 │   ├── 01_task_planner.py
 │   ├── 02_baseline_forecast.py
-│   ├── 03_signal_retrieval.py
+│   ├── 03a_signal_retrieval.py
 │   ├── 03b_signal_judge.py        # Constitutional AI filter
 │   ├── 04_event_detection.py
 │   ├── 05_evidence_structuring.py

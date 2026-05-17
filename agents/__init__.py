@@ -26,7 +26,7 @@ def _load(alias: str, filename: str):
 
 task_planner         = _load("task_planner",         "01_task_planner.py")
 baseline_forecast    = _load("baseline_forecast",    "02_baseline_forecast.py")
-signal_retrieval     = _load("signal_retrieval",     "03_signal_retrieval.py")
+signal_retrieval     = _load("signal_retrieval",     "03a_signal_retrieval.py")
 signal_judge         = _load("signal_judge",         "03b_signal_judge.py")
 event_detection      = _load("event_detection",      "04_event_detection.py")
 evidence_structuring = _load("evidence_structuring", "05_evidence_structuring.py")

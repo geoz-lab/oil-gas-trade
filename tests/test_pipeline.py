@@ -396,5 +396,54 @@ class TestReportGenerator:
         assert len(json_files) == 1
 
 
+
+# ── Live pipeline demo ─────────────────────────────────────────────────────
+
+@pytest.mark.live
+class TestLivePipeline:
+    """Full end-to-end integration test / demo.
+
+    Runs the complete 10-agent pipeline against live APIs and verifies that
+    all output artefacts are produced and structurally sound.
+
+    Keys required: ANTHROPIC_API_KEY, NEWSAPI_KEY
+    Optional:      EIA_API_KEY, ALPHA_VANTAGE_KEY
+
+    Run with:
+        pytest tests/test_pipeline.py -m live -v -s
+    """
+
+    def test_brent_8week_full_run(self, tmp_path, monkeypatch):
+        """Complete pipeline: Brent crude, 8-week horizon."""
+        import core.config as cfg
+        monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
+
+        from main import run
+        run("Forecast Brent crude oil price over the next 8 weeks")
+
+        md_files   = list(tmp_path.glob("*.md"))
+        json_files = list(tmp_path.glob("*.json"))
+        png_files  = list(tmp_path.glob("*.png"))
+
+        assert md_files,   "No markdown report produced"
+        assert json_files, "No JSON report produced"
+        assert png_files,  "No chart produced"
+
+        report_text = md_files[0].read_text()
+        for section in ("Executive Summary", "Forecast", "Evidence", "Debate"):
+            assert section in report_text, f"Report missing section: {section}"
+
+    def test_diesel_4week_full_run(self, tmp_path, monkeypatch):
+        """Complete pipeline: diesel (heating oil), 4-week horizon."""
+        import core.config as cfg
+        monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
+
+        from main import run
+        run("Forecast diesel inventory for Gulf Coast over 4 weeks", horizon=4)
+
+        assert list(tmp_path.glob("*.md")),   "No markdown report"
+        assert list(tmp_path.glob("*.json")), "No JSON report"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

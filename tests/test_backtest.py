@@ -370,18 +370,17 @@ class TestFullPipelineBacktest:
     @pytest.mark.parametrize(
         "case", FULL_PIPELINE_CASES, ids=[c["label"] for c in FULL_PIPELINE_CASES]
     )
-    def test_full_pipeline_at_historical_cutoff(self, case, monkeypatch, tmp_path):
+    def test_full_pipeline_at_historical_cutoff(self, case, monkeypatch):
         """
         Run complete pipeline anchored to a historical price baseline.
         Prints a side-by-side comparison: baseline-only vs. full pipeline vs. actual.
         """
+        import time
         import json as _json
         from agents import baseline_forecast as bf
-        import core.config as cfg
+        from core.config import REPORTS_DIR
 
-        # Redirect reports to tmp so tests stay clean
-        monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
-        # Anchor Agent 02 to the historical cutoff
+        # Anchor Agent 02 to the historical cutoff (patches module attribute — works correctly)
         monkeypatch.setattr(bf, "_fetch_weekly", _make_historical_fetcher(case["cutoff"]))
 
         # ── Baseline-only call (for comparison) ──────────────────────────
@@ -397,14 +396,15 @@ class TestFullPipelineBacktest:
         last_obs      = baseline_fc.last_observed_value
         unit          = baseline_fc.unit
 
-        # ── Full 10-agent pipeline ────────────────────────────────────────
+        # ── Full 10-agent pipeline — reports written to real REPORTS_DIR ──
         from main import run
+        t_start = time.time()
         run(case["query"], horizon=case["horizon"])
 
-        # ── Load pipeline output ──────────────────────────────────────────
-        json_files = sorted(tmp_path.glob("*.json"))
-        md_files   = sorted(tmp_path.glob("*.md"))
-        png_files  = sorted(tmp_path.glob("*.png"))
+        # ── Find files produced by this run ───────────────────────────────
+        json_files = [f for f in REPORTS_DIR.glob("*.json") if f.stat().st_mtime >= t_start]
+        md_files   = [f for f in REPORTS_DIR.glob("*.md")   if f.stat().st_mtime >= t_start]
+        png_files  = [f for f in REPORTS_DIR.glob("*.png")  if f.stat().st_mtime >= t_start]
 
         assert json_files, "Full pipeline produced no JSON report"
         assert md_files,   "Full pipeline produced no markdown report"
@@ -445,8 +445,8 @@ class TestFullPipelineBacktest:
         print(f"  ║  ─────────────────────────────────────────────")
         print(f"  ║  Executive summary (first 250 chars):")
         print(f"  ║    {exec_summary[:250].replace(chr(10), chr(10)+'  ║    ')}")
-        print(f"  ║  Report : {md_files[0].name}")
-        print(f"  ║  Chart  : {png_files[0].name}")
+        print(f"  ║  Report : {md_files[0]}")
+        print(f"  ║  Chart  : {png_files[0]}")
         print(f"  ╚{'═'*60}")
 
         # ── Structural assertions (direction-agnostic) ────────────────────
@@ -462,18 +462,18 @@ class TestFullPipelineBacktest:
         assert "executive_summary"  in report, "JSON missing executive_summary"
         assert len(exec_summary) >= 100, "Executive summary too short"
 
-    def test_full_pipeline_aggregate_comparison(self, monkeypatch, tmp_path):
+    def test_full_pipeline_aggregate_comparison(self, monkeypatch):
         """
         Run both cases and print a head-to-head comparison table:
         baseline-only directional call vs. full pipeline vs. actual.
         """
+        import time
         import json as _json
         from agents import baseline_forecast as bf
-        import core.config as cfg
+        from core.config import REPORTS_DIR
 
         rows = []
         for case in FULL_PIPELINE_CASES:
-            monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
             monkeypatch.setattr(bf, "_fetch_weekly", _make_historical_fetcher(case["cutoff"]))
 
             # Baseline-only
@@ -488,11 +488,12 @@ class TestFullPipelineBacktest:
             baseline_dir = baseline_fc.trend_direction
             last_obs     = baseline_fc.last_observed_value
 
-            # Full pipeline
+            # Full pipeline — find files produced by this run via mtime
             from main import run
+            t_start = time.time()
             run(case["query"], horizon=case["horizon"])
 
-            json_files  = sorted(tmp_path.glob("*.json"))
+            json_files  = [f for f in REPORTS_DIR.glob("*.json") if f.stat().st_mtime >= t_start]
             report      = _json.loads(json_files[-1].read_text())
             pipeline_dir = report.get("adjusted_forecast", {}).get("direction_call", "?")
 

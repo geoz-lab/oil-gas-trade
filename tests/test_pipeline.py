@@ -413,17 +413,18 @@ class TestLivePipeline:
         pytest tests/test_pipeline.py -m live -v -s
     """
 
-    def test_brent_8week_full_run(self, tmp_path, monkeypatch):
+    def test_brent_8week_full_run(self):
         """Complete pipeline: Brent crude, 8-week horizon."""
-        import core.config as cfg
-        monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
-
+        import time
+        from core.config import REPORTS_DIR
         from main import run
+
+        t_start = time.time()
         run("Forecast Brent crude oil price over the next 8 weeks")
 
-        md_files   = list(tmp_path.glob("*.md"))
-        json_files = list(tmp_path.glob("*.json"))
-        png_files  = list(tmp_path.glob("*.png"))
+        md_files   = [f for f in REPORTS_DIR.glob("*.md")   if f.stat().st_mtime >= t_start]
+        json_files = [f for f in REPORTS_DIR.glob("*.json") if f.stat().st_mtime >= t_start]
+        png_files  = [f for f in REPORTS_DIR.glob("*.png")  if f.stat().st_mtime >= t_start]
 
         assert md_files,   "No markdown report produced"
         assert json_files, "No JSON report produced"
@@ -433,16 +434,27 @@ class TestLivePipeline:
         for section in ("Executive Summary", "Forecast", "Evidence", "Debate"):
             assert section in report_text, f"Report missing section: {section}"
 
-    def test_diesel_4week_full_run(self, tmp_path, monkeypatch):
-        """Complete pipeline: diesel (heating oil), 4-week horizon."""
-        import core.config as cfg
-        monkeypatch.setattr(cfg, "REPORTS_DIR", tmp_path)
+        print(f"\n  Report : {md_files[0]}")
+        print(f"  Chart  : {png_files[0]}")
+        print(f"  JSON   : {json_files[0]}")
 
+    def test_diesel_4week_full_run(self):
+        """Complete pipeline: diesel (heating oil), 4-week horizon."""
+        import time
+        from core.config import REPORTS_DIR
         from main import run
+
+        t_start = time.time()
         run("Forecast diesel inventory for Gulf Coast over 4 weeks", horizon=4)
 
-        assert list(tmp_path.glob("*.md")),   "No markdown report"
-        assert list(tmp_path.glob("*.json")), "No JSON report"
+        md_files   = [f for f in REPORTS_DIR.glob("*.md")   if f.stat().st_mtime >= t_start]
+        json_files = [f for f in REPORTS_DIR.glob("*.json") if f.stat().st_mtime >= t_start]
+
+        assert md_files,   "No markdown report"
+        assert json_files, "No JSON report"
+
+        print(f"\n  Report : {md_files[0]}")
+        print(f"  JSON   : {json_files[0]}")
 
 
 if __name__ == "__main__":
